@@ -1,4 +1,5 @@
 Smart Interview Preparation System 🎓
+
 A modern, dashboard-driven web platform designed to help candidates prepare for job interviews through timed multiple-choice mock quizzes. The system provides a seamless experience for students to track their progress and offers administrators powerful tools to manage question banks and analyze performance data.
 
 🌟 Key Features
