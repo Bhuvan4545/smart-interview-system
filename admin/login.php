@@ -3,22 +3,29 @@ require_once '../config/db.php';
 
 $errors = [];
 
-// Ensure there is at least one admin user (default: admin@admin.com / admin123)
-// Ensure there is at least one admin user (default: admin@admin.com / admin123)
+// Seed a default admin account only when the table is empty AND the
+// ADMIN_SEED_EMAIL / ADMIN_SEED_PASS environment variables are set.
 try {
     $countStmt = $pdo->query('SELECT COUNT(*) AS cnt FROM admin');
     $row = $countStmt->fetch();
     if ((int)$row['cnt'] === 0) {
-        $defaultEmail = 'admin@admin.com';
-        $defaultPassHash = password_hash('admin123', PASSWORD_DEFAULT);
-        $insertAdmin = $pdo->prepare('INSERT INTO admin (email, password) VALUES (?, ?)');
-        $insertAdmin->execute([$defaultEmail, $defaultPassHash]);
+        $seedEmail = getenv('ADMIN_SEED_EMAIL') ?: '';
+        $seedPass  = getenv('ADMIN_SEED_PASS')  ?: '';
+        if ($seedEmail !== '' && $seedPass !== '') {
+            $defaultPassHash = password_hash($seedPass, PASSWORD_DEFAULT);
+            $insertAdmin = $pdo->prepare('INSERT INTO admin (email, password) VALUES (?, ?)');
+            $insertAdmin->execute([$seedEmail, $defaultPassHash]);
+        }
     }
 } catch (Exception $e) {
-    // optional: log error
+    error_log('Admin seed failed: ' . $e->getMessage());
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        $errors[] = 'Invalid form submission. Please try again.';
+    }
+
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -36,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $admin = $stmt->fetch();
 
         if ($admin && password_verify($password, $admin['password'])) {
+            session_regenerate_id(true);
             $_SESSION['admin_id']    = $admin['id'];
             $_SESSION['admin_email'] = $admin['email'];
             header('Location: dashboard.php');
@@ -68,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form id="adminLoginForm" method="post" action="">
+        <?php csrf_field(); ?>
         <div class="form-group">
             <label for="email">Admin Email</label>
             <input
@@ -75,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 id="email"
                 name="email"
                 value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>"
-                placeholder="admin@admin.com"
+                placeholder="admin@example.com"
             >
         </div>
 
@@ -91,9 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="form-footer">
             <button type="submit" class="btn btn-primary">Login</button>
-            <span style="font-size:0.75rem;color:#9ca3af;">
-                Default: admin@admin.com / admin123
-            </span>
         </div>
     </form>
 </div>

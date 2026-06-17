@@ -6,9 +6,12 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 
-// Handle delete
-if (isset($_GET['delete_id'])) {
-    $id = (int)$_GET['delete_id'];
+// Handle delete via POST (not GET) to prevent CSRF via link/image preloads
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    if (!csrf_validate()) {
+        die('Invalid form submission.');
+    }
+    $id = (int)$_POST['delete_id'];
     if ($id > 0) {
         $del = $pdo->prepare('DELETE FROM questions WHERE id = ?');
         $del->execute([$id]);
@@ -92,7 +95,6 @@ $questions = $stmt->fetchAll();
 </tr>
 </thead>
                         <tbody>
-<tbody>
 <?php foreach ($questions as $q): ?>
     <tr>
         <td><?php echo (int)$q['id']; ?></td>
@@ -104,13 +106,17 @@ $questions = $stmt->fetchAll();
             <a href="edit_question.php?id=<?php echo (int)$q['id']; ?>" class="btn btn-outline">
                 Edit
             </a>
-            <a
-                href="delete_question.php?delete_id=<?php echo (int)$q['id']; ?>"
-                class="btn btn-danger"
-                onclick="return confirm('Are you sure you want to delete this question?');"
-            >
-                Delete
-            </a>
+            <form method="post" action="" style="display:inline;">
+                <?php csrf_field(); ?>
+                <input type="hidden" name="delete_id" value="<?php echo (int)$q['id']; ?>">
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                    onclick="return confirm('Are you sure you want to delete this question?');"
+                >
+                    Delete
+                </button>
+            </form>
         </td>
     </tr>
 <?php endforeach; ?>

@@ -26,6 +26,10 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        $errors[] = 'Invalid form submission. Please try again.';
+    }
+
     $question  = trim($_POST['question'] ?? '');
     $category  = trim($_POST['category'] ?? '');
     $difficulty = trim($_POST['difficulty'] ?? 'Medium');
@@ -136,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="post" action="">
+                <?php csrf_field(); ?>
                 <div class="form-group">
                     <label for="question">Question Text</label>
                     <textarea id="question" name="question"><?php

@@ -4,6 +4,10 @@ require_once '../config/db.php';
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        $errors[] = 'Invalid form submission. Please try again.';
+    }
+
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -21,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $student = $stmt->fetch();
 
         if ($student && password_verify($password, $student['password'])) {
+            session_regenerate_id(true);
             $_SESSION['student_id']   = $student['id'];
             $_SESSION['student_name'] = $student['name'];
             header('Location: dashboard.php');
@@ -53,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form id="studentLoginForm" method="post" action="">
+        <?php csrf_field(); ?>
         <div class="form-group">
             <label for="email">Email address</label>
             <input

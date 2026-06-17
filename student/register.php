@@ -5,6 +5,10 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        $errors[] = 'Invalid form submission. Please try again.';
+    }
+
     $name     = trim($_POST['name'] ?? '');
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -68,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form id="studentRegisterForm" method="post" action="">
+        <?php csrf_field(); ?>
         <div class="form-group">
             <label for="name">Full Name</label>
             <input

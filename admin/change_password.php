@@ -13,6 +13,10 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        $errors[] = 'Invalid form submission. Please try again.';
+    }
+
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword     = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
@@ -114,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="post" action="">
+                <?php csrf_field(); ?>
                 <div class="form-group">
                     <label for="current_password">Current Password</label>
                     <input

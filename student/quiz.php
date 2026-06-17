@@ -47,6 +47,9 @@ $percentage = 0.0;
 $quizDurationSeconds = 600;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $totalQuestions > 0) {
+    if (!csrf_validate()) {
+        die('Invalid form submission.');
+    }
     $submitted = true;
     $answers = $_POST['answers'] ?? [];
 
@@ -200,6 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $totalQuestions > 0) {
                 </div>
             <?php else: ?>
                 <form id="quizForm" method="post" action="">
+                    <?php csrf_field(); ?>
                     <?php foreach ($questions as $index => $q): ?>
                         <div class="quiz-question">
                             <h4>
