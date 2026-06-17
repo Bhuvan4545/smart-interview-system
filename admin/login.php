@@ -3,8 +3,7 @@ require_once '../config/db.php';
 
 $errors = [];
 
-// Ensure there is at least one admin user (default: admin@admin.com / admin123)
-// Ensure there is at least one admin user (default: admin@admin.com / admin123)
+// Seed a default admin if the table is empty (change credentials in production)
 try {
     $countStmt = $pdo->query('SELECT COUNT(*) AS cnt FROM admin');
     $row = $countStmt->fetch();
@@ -91,9 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="form-footer">
             <button type="submit" class="btn btn-primary">Login</button>
-            <span style="font-size:0.75rem;color:#9ca3af;">
-                Default: admin@admin.com / admin123
-            </span>
+
         </div>
     </form>
 </div>

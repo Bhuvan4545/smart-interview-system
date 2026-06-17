@@ -6,15 +6,24 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 
-// Handle delete
-if (isset($_GET['delete_id'])) {
-    $id = (int)$_GET['delete_id'];
-    if ($id > 0) {
-        $del = $pdo->prepare('DELETE FROM questions WHERE id = ?');
-        $del->execute([$id]);
+// Generate CSRF token if not present
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Handle delete via POST with CSRF protection
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $error = 'Invalid CSRF token. Please try again.';
+    } else {
+        $id = (int)$_POST['delete_id'];
+        if ($id > 0) {
+            $del = $pdo->prepare('DELETE FROM questions WHERE id = ?');
+            $del->execute([$id]);
+        }
+        header('Location: delete_question.php');
+        exit;
     }
-    header('Location: delete_question.php');
-    exit;
 }
 
 $stmt = $pdo->query('SELECT * FROM questions ORDER BY id DESC');
@@ -74,6 +83,11 @@ $questions = $stmt->fetchAll();
         </div>
 
         <div class="section">
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-error">
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
             <?php if (empty($questions)): ?>
                 <div class="alert alert-error">
                     No questions found. Add some from the Add Question page.
@@ -92,7 +106,6 @@ $questions = $stmt->fetchAll();
 </tr>
 </thead>
                         <tbody>
-<tbody>
 <?php foreach ($questions as $q): ?>
     <tr>
         <td><?php echo (int)$q['id']; ?></td>
@@ -104,13 +117,11 @@ $questions = $stmt->fetchAll();
             <a href="edit_question.php?id=<?php echo (int)$q['id']; ?>" class="btn btn-outline">
                 Edit
             </a>
-            <a
-                href="delete_question.php?delete_id=<?php echo (int)$q['id']; ?>"
-                class="btn btn-danger"
-                onclick="return confirm('Are you sure you want to delete this question?');"
-            >
-                Delete
-            </a>
+            <form method="post" action="delete_question.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <input type="hidden" name="delete_id" value="<?php echo (int)$q['id']; ?>">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
         </td>
     </tr>
 <?php endforeach; ?>

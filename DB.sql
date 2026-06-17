@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS admin (
 CREATE TABLE IF NOT EXISTS questions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     question TEXT NOT NULL,
+    category VARCHAR(100) NOT NULL DEFAULT '',
+    difficulty ENUM('Easy','Medium','Hard') NOT NULL DEFAULT 'Medium',
     option1 VARCHAR(255) NOT NULL,
     option2 VARCHAR(255) NOT NULL,
     option3 VARCHAR(255) NOT NULL,
