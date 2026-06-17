@@ -43,16 +43,28 @@ To run this project locally, you will need a local server environment like XAMPP
 
 1. Clone the Repository
 Clone this project into your local server's root directory (e.g., the htdocs folder if you are using XAMPP, or www for WAMP).
-Bash
-git clone https://github.com/yourusername/smart-interview-system.git
+```bash
+git clone https://github.com/Bhuvan4545/smart-interview-system.git
 cd smart-interview-system
+```
+
+2. Configure Environment
+Copy the example environment file and fill in your database credentials:
+```bash
+cp .env.example .env
+# Edit .env with your DB credentials and a strong admin seed password
+```
+
+3. Import the Database
+Import `DB.sql` into MySQL / MariaDB to create the required tables.
 
 4. Run the Application
 Open your web browser and navigate to the project folder on your localhost:
-
-Plaintext
+```
 http://localhost/smart-interview-system
-🔒 Default Admin Credentials (for local testing)
-Email: admin@admin.com
-Password: admin123
-(Ensure you change these in a production environment!)
+```
+
+🔒 Admin Setup
+The first admin account is seeded automatically from the `ADMIN_SEED_EMAIL` and
+`ADMIN_SEED_PASS` environment variables (only when the admin table is empty).
+**Never commit real credentials to the repository.**
