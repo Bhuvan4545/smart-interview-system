@@ -1,0 +1,14 @@
+{
+    "name": "smart-interview-system",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Smart Interview Preparation System",
+    "scripts": {
+        "test": "jest",
+        "test:js": "jest",
+        "test:coverage": "jest --coverage"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
+    }
+}
